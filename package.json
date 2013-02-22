@@ -1,0 +1,18 @@
+{
+  "name": "jok.portal",
+  "version": "0.1.1",
+  "dependencies": {
+    "express": "3.0.0",
+    "socket.io": "0.9.11",
+    "websocket": "*",
+    "node-uuid": "*",
+    "ejs": "*"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  },
+  "scripts": {
+    "start": "node app"
+  }
+}
