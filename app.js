@@ -53,13 +53,13 @@ process.stats = { processingLoginsCount: 0, connectionsCount: 0, startTime: new 
 /* Routing */
 app.get('/', function(req, res) {
 	try {
-	    res.render('index', { 
-	    	title: 'Express', 
-	    	sid: req.query.sid, 
-	    	room: req.query.room 
-	    });
+        res.render('index', { 
+            title: 'Express', 
+            sid: req.query.sid, 
+            room: req.query.room 
+        });
 	} catch(ex) {
-	    res.end(JSON.stringify(ex));
+        res.end(JSON.stringify(ex));
 	}
 })
 app.get('/stats', function(req, res) {
@@ -72,8 +72,8 @@ app.get('/stats', function(req, res) {
 
     var usersCount = 0;
     for (var i in portal.manager.rooms) {
-    	if (i.indexOf('/portal/') > -1)
-    		usersCount++;
+        if (i.indexOf('/portal/') > -1)
+            usersCount++;
     }
 
 
@@ -99,17 +99,17 @@ app.get('/stats', function(req, res) {
 })
 app.get('/stats/rooms', function(req, res) {
     res.writeHead(200, {
-     	'content-type': 'text/html'
+        'content-type': 'text/html'
     });
 
     var roomsCount = 0;
     for (var i in portal.manager.rooms) {
-    	roomsCount++;
+        roomsCount++;
     }
 
     res.write('Rooms (' + roomsCount + '):<br/>');
     for (var i in portal.manager.rooms) {
-    	res.write(i +' - ' + portal.manager.rooms[i].length + '<br/>');
+        res.write(i +' - ' + portal.manager.rooms[i].length + '<br/>');
     }
 
     res.end();
