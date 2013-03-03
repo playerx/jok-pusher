@@ -77,6 +77,9 @@ app.get('/stats', function(req, res) {
     }
 
 
+    res.write('NextStepItems: ' + db.nextStepItems.length + '<br/>');
+    res.write('PendingItems: ' + db.pendingItems.length + '<br/>');
+    res.write('---------------------------<br/>');
     res.write('processing logins: ' + process.stats.processingLoginsCount + '<br/>');
     res.write('user count: ' + usersCount + '<br/>');
     res.write('user connections count: ' + io.sockets.clients().length + '<br/>');
@@ -153,10 +156,14 @@ io.configure(function (){
 		    	return;
 		    }
 
+
+            handshakeData.sid = sid;
+            
 		    process.stats.processingLoginsCount++;
 
+            var gameid = handshakeData.query.gameid;
 
-		    db.checkLogin(sid, ipaddress, function(isSuccess, userid) {
+		    db.checkLogin(sid, ipaddress, gameid, function(isSuccess, userid) {
 
 		    	process.stats.processingLoginsCount--;
 
@@ -196,6 +203,16 @@ var checkConnectionsLimit = function(userid) {
 }
 
 /* Portal Service */
+io.on('connection', function(socket){
+    
+    db.login(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid);
+    
+    socket.on('disconnect', function() {
+        db.logout(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid)
+    });
+})
+
+
 var portal = io.of('/portal').on('connection', function (socket) {
 
 	var userid = socket.handshake.userid;
@@ -205,9 +222,6 @@ var portal = io.of('/portal').on('connection', function (socket) {
 
 	socket.join(userid);
 
-
-	// ბაზაში ინფორმაციის განახლება
-	db.login(userid, 'ipaddress');
 
 
 	// მეგობრებისთვის ინფოს გაგზავნა
@@ -290,11 +304,6 @@ var portal = io.of('/portal').on('connection', function (socket) {
 		// თუ ჯერ კიდევ არსებობს რომელიმე კონექშენი ამ მომხმარებელზე, ის ონლაინად ითვლება
 		if (room && room.length > 1) return;
 
-
-		// ბაზაში ინფორმაციის განახლება
-		db.logout(userid)
-
-
 		// ონლაინ მეგობრებისთვის ინფორმაციის გაგზავნა მისი გასვლის შესახებ
 		db.getOnlineFriends(userid, (function(friends) {
 
@@ -356,11 +365,7 @@ var chat = io.of('/chat').on('connection', function (socket) {
 /* Start */
 server.listen(app.get('port'), function(){
   	console.log("Express server listening on port " + app.get('port'));
-  	db.resetUserStatuses();
+	db.resetUserStatuses();
+    
+	db.init();
 });
-
-
-
-
-
-
