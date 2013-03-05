@@ -192,9 +192,8 @@ app.get('/UpdateTrackInfo/:channel/:track', function(req, res) {
 
 setInterval(function() {
     
-    if (io.sockets.clients('admin').length === 0) return; 
+//    if (io.sockets.clients('admin').length === 0) return; 
     
-    console.log('admin response');
     
     var usersCount = 0;
     for (var i in io.sockets.manager.rooms) {
