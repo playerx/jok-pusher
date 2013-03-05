@@ -201,7 +201,7 @@ setInterval(function() {
             usersCount++;
     }
     
-    io.in('admin').emit('', process.memoryUsage(), process.stats, usersCount, io.sockets.clients().length);
+    io.sockets.emit('RealtimeStatistics', process.memoryUsage(), process.stats, usersCount, io.sockets.clients().length);
 }, 3000);
 
 
@@ -252,7 +252,7 @@ io.on('connection', function(socket){
         
 		// მეგობრებისთვის ინფორმაციის გაგზავნა
 		for (var i = 0; i < friends.length; i++) {
-			var friendUser = io.in(getUserIDInRoom(friends[i].UserID));
+			var friendUser = io.sockets(getUserIDInRoom(friends[i].UserID));
 			if (friendUser) {
 				socket.emit('FriendCameOnline', friends[i].UserID)
                 friendUser.emit('FriendCameOnline', userid);
@@ -265,7 +265,7 @@ io.on('connection', function(socket){
     
     
 	socket.on('SendGameOffer', function(userid, gamekey, options) {
-		var offerUser = io.in(getUserIDInRoom(userid));
+		var offerUser = io.sockets.in(getUserIDInRoom(userid));
 		if (!offerUser) return;
         
 		offerUser.emit('GameOffer', socket.userid, gamekey, options);
@@ -273,7 +273,7 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('AcceptGameOffer', function(userid, gamekey, options) {
-		var offerUser = io.in(getUserIDInRoom(userid));
+		var offerUser = io.sockets.in(getUserIDInRoom(userid));
 		if (!offerUser) return;
         
         
@@ -285,7 +285,7 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('DeclineGameOffer', function(userid, gamekey, options) {
-		var offerUser = io.in(getUserIDInRoom(userid));
+		var offerUser = io.sockets.in(getUserIDInRoom(userid));
 		if (!offerUser) return;
 
 
@@ -294,7 +294,7 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('CancelGameOffer', function(userid) {
-		var offerUser = io.in(getUserIDInRoom(userid));
+		var offerUser = io.sockets.in(getUserIDInRoom(userid));
 		if (!offerUser) return;
 
 
@@ -304,7 +304,7 @@ io.on('connection', function(socket){
     
     
     socket.on('ChatRequest', function(partnerUserID) {
-        var offerUser = io.in(getUserIDInRoom(partnerUserID));
+        var offerUser = io.sockets.in(getUserIDInRoom(partnerUserID));
         if (!offerUser) return;
         
 		var cid = uuid.v4();
@@ -324,7 +324,7 @@ io.on('connection', function(socket){
 
 	socket.on('ChatMessage', function(cid, msg) {
 
-		var channel = io.in('chat/'+cid);
+		var channel = io.sockets.in('chat/'+cid);
 		if (!channel) return;
 
 		try {
@@ -354,7 +354,7 @@ io.on('connection', function(socket){
         db.getOnlineFriends(userid, (function(friends) {
             
 			for (var i = 0; i < friends.length; i++) {
-				var friendUser = io.in(getUserIDInRoom(friends[i].UserID));
+				var friendUser = io.sockets.in(getUserIDInRoom(friends[i].UserID));
 				if (friendUser)
 					friendUser.emit('FriendGoneOffline', userid);
                     
