@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Jok.Realtime</title>
+    <style>
+        div.root {
+            width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+        div.root .title {
+            border-bottom: 1px solid silver;
+            font-family: Sylfaen;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 5px;
+        }
+        
+        
+        #stats {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    
+        #log {
+            padding: 10px;
+        }
+    
+        #log div span {
+            color: gray;
+        }
+    
+        #log div .connection0 {
+            color: white;
+            background: orange;
+            padding: 0 5px;
+        }
+    
+        #log div .connection.green {
+            color: white;
+            background: green;
+            padding: 0 5px;
+        }
+    
+        #log div .connection.orange {
+            color: white;
+            background: orange;
+            padding: 0 5px;
+        }
+    
+        #log div .connection.red {
+            color: white;
+            background: red;
+            padding: 0 5px;
+        }
+    
+        #log div.error {
+            border: 1px solid red;
+            background: white;
+        }
+    
+        #log div.error span {
+            color: red;
+        }
+    </style>
+    <script src="/js/jquery-1.6.4.js"></script>
+    <script src="/js/jquery.cookie.js"></script>
+    <script src="/js/socket.io.js"></script>
+</head>
+<body>
+    <div class="root">
+        <div class="title">
+            Jok Pusher (Powered by Node.js)
+        </div>
+        
+        <script>
+            var realtime = {
+                socket: undefined,
+                
+                Init: function () {
+                    
+                    $.cookie('sid', '<%=sid%>', {expores: 30});
+                    
+                    this.socket = io.connect('http://pusher.jok.ge:80?gameid=6', { 'sync disconnect on unload': true });
+                    
+                    this.socket.on('connect', this.Connected.bind(this));
+                    this.socket.on('disconnect', this.Disconnected.bind(this));
+                    this.socket.on('reconnecting', this.Reconnecting.bind(this));
+                    this.socket.on('reconnect', this.Reconnected.bind(this));
+                    this.socket.on('reconnect_failed', this.ReconnectFailed.bind(this));
+                    this.socket.on('message', this.Message.bind(this));
+                    
+                    this.socket.on('RealtimeStatistics', this.RealtimeStatistics.bind(this));
+                    
+                },
+                
+                Connected: function(){
+                    $('#log').prepend('<div><div class="connection green">Connected</div></div>');
+                },
+                
+                Disconnected: function(){
+                    $('#log').prepend('<div><div class="connection red">Disconnected</div></div>');
+                },
+                
+                Reconnecting: function(){
+                    $('#log').prepend('<div><div class="connection orange">Reconnecting</div></div>');
+                },
+                
+                Reconnected: function(){
+                    $('#log').prepend('<div><div class="connection green">Reconnected</div></div>');
+                },
+                
+                ReconnectFailed: function(){
+                    $('#log').prepend('<div><div class="connection red">ReconnectFailed</div></div>');
+                },
+                
+                Message: function (msg) {
+                    
+//                    if (msg.M == 'ActiveConnectionsCount') return;
+//                    
+//                    if (msg.M == 'Error') {
+//                        $('#log').prepend('<div class="error"><span>' + msg.M + '</span>: ' + JSON.stringify(msg.A) + '</div>');
+//                        return;
+//                    }
+                    
+                    $('#log').prepend('<div><span></span>: ' + JSON.stringify(msg) + '</div>');
+                },
+                
+                RealtimeStatistics: function (usersCount, connectionsCount) {
+//                    $('#stats span').html(count);
+                },
+            };
+            
+            
+            realtime.Init();
+            
+        </script>
+        <div id="stats">
+            Active Connections: <span>0</span>
+        </div>
+        <div id="log"></div>
+    </div>
+</body>
+</html>
