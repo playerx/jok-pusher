@@ -1,5 +1,5 @@
 /*
- *	Jok.ge - Portal Service
+ *    Jok.ge - Portal Service
  *  -------------------------
  *	 პორტალის მომხმარებლების კომუნიკაცია, თამაშების შეთავაზება და აქტური
  *   ონლაინ მეგობრების შესახებ ინფორმაციის მიწოდება
@@ -204,14 +204,24 @@ var checkConnectionsLimit = function(userid) {
 
 /* Portal Service */
 io.on('connection', function(socket){
-    var userid = socket.handshake.userid;
-    socket.userid = userid;
+    
+    db.login(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid);
+    
+    socket.on('disconnect', function() {
+        db.logout(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid)
+    });
+})
 
-    checkConnectionsLimit(userid);
+
+var portal = io.of('/portal').on('connection', function (socket) {
+
+	var userid = socket.handshake.userid;
+	socket.userid = userid;
+
+	checkConnectionsLimit(userid);
 
 	socket.join(userid);
 
-    db.login(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid);
 
 
 	// მეგობრებისთვის ინფოს გაგზავნა
@@ -235,32 +245,8 @@ io.on('connection', function(socket){
 			friendUser = null;
 		}
 	});
-    
-    
-    socket.on('disconnect', function() {
-        db.logout(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid)
-        
-        // ონლაინ მეგობრებისთვის ინფორმაციის გაგზავნა მისი გასვლის შესახებ
-        db.getOnlineFriends(userid, (function(friends) {
-            
-			for (var i = 0; i < friends.length; i++) {
-				var friendUser = portal.in(friends[i].UserID);
-				if (friendUser)
-					friendUser.emit('FriendGoneOffline', userid);
-                    
-				friendUser = null;
-			}
-
-		}).bind(this));
-    });
-})
 
 
-var portal = io.of('/portal').on('connection', function (socket) {
-
-    var userid = socket.handshake.userid;
-    socket.userid = userid;
-    
 	socket.on('chat request', function(partnerUserID) {
 		var offerUser = portal.in(partnerUserID);
 		if (!offerUser) return;
@@ -310,6 +296,27 @@ var portal = io.of('/portal').on('connection', function (socket) {
 		offerUser = null;
 	})
 
+	socket.on('disconnect', function() {
+
+		var roomFullName = [portal.name, '/', userid].join('');
+		var room = io.sockets.manager.rooms[roomFullName];
+
+		// თუ ჯერ კიდევ არსებობს რომელიმე კონექშენი ამ მომხმარებელზე, ის ონლაინად ითვლება
+		if (room && room.length > 1) return;
+
+		// ონლაინ მეგობრებისთვის ინფორმაციის გაგზავნა მისი გასვლის შესახებ
+		db.getOnlineFriends(userid, (function(friends) {
+
+			for (var i = 0; i < friends.length; i++) {
+				var friendUser = portal.in(friends[i].UserID);
+				if (friendUser)
+					friendUser.emit('FriendGoneOffline', userid);
+
+				friendUser = null;
+			}
+
+		}).bind(this));
+	})
 });
 
 /* Chat Service */
