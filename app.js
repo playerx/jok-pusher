@@ -166,15 +166,31 @@ app.get('/stats/rooms', function(req, res) {
         'content-type': 'text/html'
     });
 
-    var roomsCount = 0;
-    for (var i in io.manager.rooms) {
-        roomsCount++;
+    try {
+        var roomsCount = 0;
+        for (var i in io.manager.rooms) {
+            roomsCount++;
+        }
+        
+        res.write('Rooms (' + roomsCount + '):<br/>');
+        for (var j in io.manager.rooms) {
+            res.write(j +' - ' + io.manager.rooms[j].length + '<br/>');
+        }
     }
+    catch (err) { res.write(err); }
 
-    res.write('Rooms (' + roomsCount + '):<br/>');
-    for (var j in io.manager.rooms) {
-        res.write(j +' - ' + io.manager.rooms[j].length + '<br/>');
+    res.end();
+});
+app.get('/stats/test', function(req, res) {
+    res.writeHead(200, {
+        'content-type': 'text/html'
+    });
+
+    try {
+        var friendUser = io.sockets(getUserIDInRoom(32));
+        res.write(friendUser);
     }
+    catch (err) { res.write(err); }
 
     res.end();
 });
