@@ -196,7 +196,7 @@ app.get('/stats/test', function(req, res) {
 });
 app.get('/UpdateTrackInfo/:channel/:track', function(req, res) {
     try {
-		io.emit('music channel update', req.params.channel, req.params.track);
+        io.emit('MusicChannelUpdate', req.params.channel, req.params.track);
     }
     catch(err) {
 		res.end('0');
