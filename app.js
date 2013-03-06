@@ -75,7 +75,7 @@ app.configure(function(){
             
             process.stats.processingLoginsCount++;
             
-            var gameid = handshakeData.query.gameid;
+            var gameid = handshakeData.query.gameid || 0;
             
             db.checkLogin(sid, ipaddress, gameid, function(isSuccess, userid) {
                 
@@ -200,7 +200,8 @@ setInterval(function() {
         if (i.indexOf('user/') > -1)
             usersCount++;
     }
-    
+
+
     io.sockets.emit('RealtimeStatistics', process.memoryUsage(), process.stats, usersCount, io.sockets.clients().length);
 }, 3000);
 
