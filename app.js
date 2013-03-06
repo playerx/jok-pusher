@@ -77,9 +77,11 @@ app.configure(function(){
             
             var gameid = handshakeData.query.gameid || 0;
             
-            db.checkLogin(sid, ipaddress, gameid, function(isSuccess, userid) {
+            db.checkLogin(sid, ipaddress, gameid, function(isSuccess, userid, isAdmin) {
                 
                 process.stats.processingLoginsCount--;
+                
+                handshakeData.isAdmin = isAdmin;
                 
                 if (isSuccess)
                     handshakeData.userid = userid;
@@ -192,7 +194,7 @@ app.get('/UpdateTrackInfo/:channel/:track', function(req, res) {
 
 setInterval(function() {
     
-//    if (io.sockets.clients('admin').length === 0) return; 
+    if (io.sockets.clients('admin').length === 0) return; 
     
     
     var usersCount = 0;
@@ -202,7 +204,7 @@ setInterval(function() {
     }
 
 
-    io.sockets.emit('RealtimeStatistics', process.memoryUsage(), process.stats, usersCount, io.sockets.clients().length);
+    io.sockets.in('admin').emit('RealtimeStatistics', process.memoryUsage(), process.stats, usersCount, io.sockets.clients().length);
 }, 3000);
 
 
@@ -238,6 +240,10 @@ io.on('connection', function(socket){
 
     socket.userid = userid;
 	socket.join(getUserIDInRoom(socket.userid));
+    
+    if (socket.handshake.isAdmin){
+        socket.join('admin');
+    }
     
 	// მეგობრებისთვის ინფოს გაგზავნა
 	db.getOnlineFriends(userid, function(friends) {

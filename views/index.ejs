@@ -82,7 +82,9 @@
                 
                 Init: function () {
                     
-                    $.cookie('sid', '<%=sid%>', {expores: 30});
+                    var sid = '<%=sid%>';
+                    if (sid && sid != 'undefined')
+                        $.cookie('sid', sid, { expires: 30 });
                     
                     this.socket = io.connect();
                     
@@ -91,7 +93,7 @@
                     this.socket.on('reconnecting', this.Reconnecting.bind(this));
                     this.socket.on('reconnect', this.Reconnected.bind(this));
                     this.socket.on('reconnect_failed', this.ReconnectFailed.bind(this));
-                    this.socket.on('*', this.Message.bind(this));
+                    this.socket.on('message', this.Message.bind(this));
                     
                     this.socket.on('RealtimeStatistics', this.RealtimeStatistics.bind(this));
                     
