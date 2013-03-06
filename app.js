@@ -275,9 +275,11 @@ io.on('connection', function(socket){
         
 		// მეგობრებისთვის ინფორმაციის გაგზავნა
 		for (var i = 0; i < friends.length; i++) {
-			var friendUser = io.sockets(getUserIDInRoom(friends[i].UserID));
+            
+            socket.emit('FriendCameOnline', friends[i].UserID);
+            
+			var friendUser = io.sockets.in(getUserIDInRoom(friends[i].UserID));
 			if (friendUser) {
-				socket.emit('FriendCameOnline', friends[i].UserID)
                 friendUser.emit('FriendCameOnline', userid);
 			}
 			friendUser = null;
