@@ -250,7 +250,7 @@ io.on('connection', function(socket){
         if (socket === null) return;
         
 		// მეგობრების სიის გაგზავნა
-		socket.emit('OnlineFriends', friends);
+//		socket.emit('OnlineFriends', friends);
         
         
 		// თუ არცერთი მეგობარი არაა ონლაინში გამოსვლა
