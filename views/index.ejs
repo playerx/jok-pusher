@@ -91,7 +91,7 @@
                     this.socket.on('reconnecting', this.Reconnecting.bind(this));
                     this.socket.on('reconnect', this.Reconnected.bind(this));
                     this.socket.on('reconnect_failed', this.ReconnectFailed.bind(this));
-                    this.socket.on('anything', this.Message.bind(this));
+                    this.socket.on('*', this.Message.bind(this));
                     
                     this.socket.on('RealtimeStatistics', this.RealtimeStatistics.bind(this));
                     
