@@ -395,7 +395,7 @@ io.on('connection', function(socket){
 /* Start */
 server.listen(app.get('port'), function(){
     console.log("Express server listening on port " + app.get('port'));
-	//db.resetUserStatuses();
+	db.resetUserStatuses();
     
 	db.init();
 });
