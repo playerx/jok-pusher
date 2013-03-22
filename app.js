@@ -46,23 +46,7 @@ app.configure(function(){
     io.set('authorization', function (handshakeData, callback) {
         try {
             var ipaddress = handshakeData.address.address;
-            
-            // parse sid cookie & try to login
-			var cookies = {};
-            
-            
-			try {
-                var cookiesCol = handshakeData.headers.cookie.split(';');
-                for (var i = 0; i < cookiesCol.length; i++) {
-                    var keyVal = cookiesCol[i].split('=');
-                    cookies[keyVal[0].trim()] = keyVal[1].trim();
-                }
-            }
-            catch (err) { return; }
-            
-            var sid = cookies['sid'];
-            
-            
+            var sid = handshakeData.query.sid;
             
             if (!sid) { callback(null, false);  return; }
             
