@@ -97,7 +97,7 @@ app.configure('development', function(){
 
 
 
-process.stats = { processingLoginsCount: 0, connectionsCount: 0, startTime: new Date() };
+process.stats = { processingLoginsCount: 0, connectionsCount: 0, startTime: new Date(), invitesSent: 0, invitesAccepted: 0, invitesDeclined: 0, invitesTimout: 0 };
 
 /* Routing */
 app.get('/', function(req, res) {
@@ -140,10 +140,10 @@ app.get('/stats', function(req, res) {
     res.write('Heap Used - ' + Math.round(memUsage.heapUsed / (1024 * 1024)) + ' MB<br/>');
     res.write('Heap Total - ' + Math.round(memUsage.heapTotal / (1024 * 1024)) + ' MB<br/>');
     res.write('---------------------------<br/>');
-    // res.write('sent    : ' + portalService.sendGameOffersCount + '<br/>');
-    // res.write('cancel  : ' + portalService.cancelGameOffersCount + '<br/>');
-    // res.write('accept  : ' + portalService.acceptGameOffersCount + '<br/>');
-    // res.write('decline : ' + portalService.declineGameOffersCount + '<br/>');
+    res.write('sent    : ' + process.stats.invitesSent + '<br/>');
+    res.write('timeout : ' + process.stats.invitesTimout + '<br/>');
+    res.write('accept  : ' + process.stats.invitesAccepted + '<br/>');
+    res.write('decline : ' + process.stats.invitesDeclined + '<br/>');
     res.end();
 });
 app.get('/stats/rooms', function(req, res) {
@@ -281,6 +281,8 @@ io.on('connection', function(socket){
         
 		offerUser.emit('GameOffer', socket.userid, gamekey, options);
 		offerUser = null;
+        
+        process.stats.invitesSent++;
 	});
 
 	socket.on('AcceptGameOffer', function(userid, gamekey, options) {
@@ -293,6 +295,8 @@ io.on('connection', function(socket){
 		socket.emit('GameOfferAccepted', socket.userid, gamekey, options, tableid);
 		offerUser.emit('GameOfferAccepted', socket.userid, gamekey, options, tableid);
 		offerUser = null;
+        
+        process.stats.invitesAccepted++;
 	});
 
 	socket.on('DeclineGameOffer', function(userid, gamekey, options) {
@@ -302,6 +306,8 @@ io.on('connection', function(socket){
 
 		offerUser.emit('GameOfferDeclined', socket.userid, gamekey);
 		offerUser = null;
+        
+        process.stats.invitesDeclined++;
 	});
 
 	socket.on('CancelGameOffer', function(userid) {
@@ -311,6 +317,8 @@ io.on('connection', function(socket){
 
 		offerUser.emit('GameOfferCanceled', socket.userid);
 		offerUser = null;
+        
+        process.stats.invitesTimout++;
 	});
     
     
