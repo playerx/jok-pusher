@@ -113,7 +113,7 @@ app.get('/', function(req, res) {
 });
 app.get('/stats', function(req, res) {
     res.writeHead(200, {
-     'content-type': 'text/html'
+     'content-type': 'application/json'
     });
 
     var uptime = Math.round((new Date() - process.stats.startTime) / 60000);
@@ -125,25 +125,30 @@ app.get('/stats', function(req, res) {
             usersCount++;
     }
 
-
-    res.write('NextStepItems: ' + db.nextStepItems.length + '<br/>');
-    res.write('PendingItems: ' + db.pendingItems.length + '<br/>');
-    res.write('---------------------------<br/>');
-    res.write('processing logins: ' + process.stats.processingLoginsCount + '<br/>');
-    res.write('user count: ' + usersCount + '<br/>');
-    res.write('user connections count: ' + io.sockets.clients().length + '<br/>');
-    res.write('---------------------------<br/>');
-    res.write('up time: ' + uptime + ' min.<br/>');
-    res.write('<br/>');
-    res.write('memory usage:<br/>');
-    res.write('RSS - ' + Math.round(memUsage.rss / (1024 * 1024)) + ' MB<br/>');
-    res.write('Heap Used - ' + Math.round(memUsage.heapUsed / (1024 * 1024)) + ' MB<br/>');
-    res.write('Heap Total - ' + Math.round(memUsage.heapTotal / (1024 * 1024)) + ' MB<br/>');
-    res.write('---------------------------<br/>');
-    res.write('sent    : ' + process.stats.invitesSent + '<br/>');
-    res.write('timeout : ' + process.stats.invitesTimout + '<br/>');
-    res.write('accept  : ' + process.stats.invitesAccepted + '<br/>');
-    res.write('decline : ' + process.stats.invitesDeclined + '<br/>');
+    res.write(JSON.stringify({
+        Common: {
+            NextStepItems: db.nextStepItems.length,
+            PendingItems: db.pendingItems.length
+        },
+        Stats: {
+            ProcessingLogins: process.stats.processingLoginsCount,
+            UsersCount: usersCount,
+            UserConnectionsCount: io.sockets.clients().length
+        },
+        Memory: {
+            RSS: Math.round(memUsage.rss / (1024 * 1024)),
+            HeapUsed: Math.round(memUsage.heapUsed / (1024 * 1024)),
+            HeapTotal: Math.round(memUsage.heapTotal / (1024 * 1024))
+        },
+        Usage: {
+            Sent: process.stats.invitesSent,
+            Timout: process.stats.invitesTimout,
+            Accept: process.stats.invitesAccepted,
+            Decline: process.stats.invitesDeclined
+        },
+        StartTime: process.stats.startTime,
+        Uptime: uptime
+    }));
     res.end();
 });
 app.get('/stats/rooms', function(req, res) {
@@ -389,9 +394,9 @@ io.on('connection', function(socket){
 /* Start */
 server.listen(app.get('port'), function(){
     console.log("Express server listening on port " + app.get('port'));
-	db.resetUserStatuses();
+	// db.resetUserStatuses();
     
-	db.init();
+	// db.init();
 });
 
 
