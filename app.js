@@ -45,7 +45,7 @@ app.configure(function(){
     io.set('polling duration', 10);
     io.set('authorization', function (handshakeData, callback) {
         try {
-            var ipaddress = handshakeData.address.address;
+            var ipaddress = handshakeData.headers['x-forwarded-for'] || handshakeData.address.address;
             var sid = handshakeData.query.sid;
             
             if (!sid) { callback(null, false);  return; }
@@ -239,7 +239,7 @@ var getUserIDInRoom = function(userid) {
 /* [Service] */
 io.on('connection', function(socket){
     
-    db.login(socket.handshake.sid, socket.handshake.address.address, socket.handshake.query.gameid);
+    db.login(socket.handshake.sid, socket.handshake.headers['x-forwarded-for'] || socket.handshake.address.address, socket.handshake.query.gameid);
     
     var userid = socket.handshake.userid;
 	
