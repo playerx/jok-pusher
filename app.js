@@ -51,9 +51,11 @@ app.configure(function(){
             if (!sid) { callback(null, false);  return; }
             
             if (sid.length != 36) {
-                callback(null, false);
+                handshakeData.isAnonymous = true;
+                callback(null, true);
                 return;
             }
+            
             
             
             handshakeData.sid = sid;
@@ -71,7 +73,11 @@ app.configure(function(){
                 if (isSuccess)
                     handshakeData.userid = userid;
                 
-                callback(null, isSuccess);
+                if (!isSuccess) {
+                    handshakeData.isAnonymous = true;
+                }
+
+                callback(null, true);
             });
 		}
 		catch (err) {
@@ -237,7 +243,9 @@ var getUserIDInRoom = function(userid) {
 
 
 /* [Service] */
-io.on('connection', function(socket){
+io.on('connection', function (socket) {
+
+    if (socket.handshake.isAnonymous) return;
     
     db.login(socket.handshake.sid, socket.handshake.headers['x-forwarded-for'] || socket.handshake.address.address, socket.handshake.query.gameid);
     
